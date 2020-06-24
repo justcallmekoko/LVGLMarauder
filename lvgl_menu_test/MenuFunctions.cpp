@@ -93,6 +93,7 @@ void MenuFunctions::RunSetup() {
   // Calibration data
   //uint16_t calData[5] = { 390, 3516, 253, 3520, 7 }; tft.setRotation(1); // Portrait
 
+  // Make sure you define which one you are using
   #ifdef TFT_SHIELD
     uint16_t calData[5] = { 275, 3494, 361, 3528, 4 }; // tft.setRotation(0); // Portrait with TFT Shield
     Serial.println("Using TFT Shield");
@@ -154,10 +155,10 @@ void MenuFunctions::RunSetup() {
   addNodes(&mainMenu, "WiFi", TFT_GREEN, NULL, 0, [this](){changeMenu(&wifiMenu);});
   addNodes(&mainMenu, "Bluetooth", TFT_CYAN, NULL, 0, [this](){changeMenu(&bluetoothMenu);});
   addNodes(&mainMenu, "Chicken", TFT_CYAN, NULL, 0, [this](){event_handler1;});
-  addNodes(&mainMenu, "Sluts", TFT_CYAN, NULL, 0, [this](){event_handler1;});
+  addNodes(&mainMenu, "Sloths", TFT_CYAN, NULL, 0, [this](){event_handler1;});
   addNodes(&mainMenu, "Anime", TFT_CYAN, NULL, 0, [this](){event_handler1;});
   addNodes(&mainMenu, "Nani?", TFT_CYAN, NULL, 0, [this](){event_handler1;});
-  addNodes(&mainMenu, "That MFing Thang", TFT_CYAN, NULL, 0, [this](){event_handler1;});
+  addNodes(&mainMenu, "Just some good stuff", TFT_CYAN, NULL, 0, [this](){event_handler1;});
   addNodes(&mainMenu, "Legitness", TFT_CYAN, NULL, 0, [this](){event_handler1;});
   addNodes(&mainMenu, "Boiii", TFT_CYAN, NULL, 0, [this](){event_handler1;});
 
@@ -192,10 +193,13 @@ void MenuFunctions::changeMenu(Menu* menu) {
   buildButtons(menu);
 }
 
+// Function to build a scrollable list object and populate it with buttons
 void MenuFunctions::buildButtons(Menu* menu) {
   if (menu->list != NULL) {
 
     // Create a scroll
+    // Not quite sure how to use the layout function
+    // LV_LAYOUT_PRETTY was not found
     //lv_page_set_scrl_layout(lv_scr_act(), LV_LAYOUT_PRETTY);
 
     // Create a list
@@ -208,12 +212,16 @@ void MenuFunctions::buildButtons(Menu* menu) {
     lv_obj_align(list, NULL, LV_ALIGN_IN_TOP_LEFT, 10, 10);
 
     // Clean list before adding any buttons
+    // This is not needed because I thought I was going to make the list 
+    // a variable of the MenuFunctions class...but it wouldn't work
     lv_list_clean(list);
 
     // Add buttons to list
     for (int i = 0; i < menu->list->size(); i++) {
       lv_obj_t * label;
       lv_obj_t * new_button;
+      
+      // Of course convert a string to char array
       char buf[menu->list->get(i).name.length() + 1] = {};
       menu->list->get(i).name.toCharArray(buf, menu->list->get(i).name.length() + 1);
 
@@ -235,13 +243,18 @@ void MenuFunctions::buildButtons(Menu* menu) {
   }
 }
 
+// Not a very descriptive name, but I wrote this at 2300 on a work night
 void MenuFunctions::the_thang(lv_obj_t *obj, lv_event_t event){
   //Serial.println("Button clickened: " + throat);  
   String obj_name = lv_list_get_btn_text(obj);
   if (event == LV_EVENT_CLICKED) {
     Serial.print("\n" + obj_name);
 
+    // Iterate through all of the menu nodes in the current menu
     for (int i = 0; i < current_menu->list->size(); i++) {
+      
+      // This is where the magic of menu traversal using the lvgl library happens
+      // Run the callable function of the node with the name of the list button that was clicked
       if (obj_name == current_menu->list->get(i).name) {
         Serial.print(" -> " + current_menu->list->get(i).name + "\n");
         current_menu->list->get(i).callable();
@@ -250,6 +263,9 @@ void MenuFunctions::the_thang(lv_obj_t *obj, lv_event_t event){
   }
 }
 
+// Really this is just a placeholder function for now
+// All list button clicks will either run changeMenu to traverse menus
+// or they will run an actual function like a wifi or bluetooth application
 void MenuFunctions::event_handler1(lv_obj_t * obj, lv_event_t event) {
   Serial.println(lv_btn_get_state(obj));
   if(event == LV_EVENT_CLICKED) {
